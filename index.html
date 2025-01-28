@@ -1,0 +1,72 @@
+import streamlit as st
+from PIL import Image
+import tensorflow as tf
+from keras.applications.vgg19 import preprocess_input
+from tensorflow.keras.utils import img_to_array, load_img
+import numpy as np
+
+model = tf.keras.models.load_model('./Model.h5', compile=False)
+
+st.write("""
+# Plant Disease Detection 
+""")
+st.write("This is a simple image classification web app to predict plant disease and recommend pesticides.")
+
+file = st.file_uploader("Please upload an image file", type=["jpg", "png"])
+
+information = {
+0: {"disease": "Apple Scab", "pesticide": "Myclobutanil"},
+1: {"disease": "Apple Black rot", "pesticide": "Daconil"},
+2: {"disease": "Apple Cedar Rust", "pesticide": "Myclobutanil(Immunox)"},
+3: {"disease": "Apple Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+4: {"disease": "Blueberry Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+5: {"disease": "Cherry Powdery Mildew", "pesticide": "Patch Pro "},
+6: {"disease": "Cherry Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+7: {"disease": "Corn Cercospora leaf spot", "pesticide": "Systhane/ Heritage(azoxystrobin)"},
+8: {"disease": "Corn Common rust", "pesticide": "Mancozeb and Myclobutanil"},
+9: {"disease": "Corn Northern leaf blight", "pesticide": "Daconil"},
+10: {"disease": "Corn Healthy leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+11: {"disease": "Grape Black rot", "pesticide": "Mancozeb and Ziram"},
+12: {"disease": "Grape Esca(Black measles)", "pesticide": "Mancozeb and Captan"},
+13: {"disease": "Grape Leaf Blight", "pesticide": "Bordeaux mixture"},
+14: {"disease": "Grape Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+15: {"disease": "Orange Haunglongbing", "pesticide": "Oxytetracycline and Streptomycin"},
+16: {"disease": "Peach Bacterial Spot", "pesticide": "Oxytetracycline and Mycoshield"},
+17: {"disease": "Peach Healthy", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+18: {"disease": "Pepper Bacterial spot", "pesticide": "Copper Sprays"},
+19: {"disease": "Pepper Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+20: {"disease": "Potato Early Blight", "pesticide": "Septum"},
+21: {"disease": "Potato Late Blight", "pesticide": "Acrobat MZ/ Tattoo C"},
+22: {"disease": "Potato Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+23: {"disease": "Raspberry Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+24: {"disease": "Soybean Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+25: {"disease": "Squash Powdery Mildew", "pesticide": "Sodium Bicarbonate"},
+26: {"disease": "Strawberry Leaf Scorch", "pesticide": "Thiophanate-Methyl fungicide"},
+27: {"disease": "Strawberry Healthy Leaf", "pesticide": "Healthy Leaf,No need of any Pesticide"},
+28: {"disease": "Tomato Bacterial Spot", "pesticide": "Streptomycin"},
+29: {"disease": "Tomato Early Blight", "pesticide": "Conika Fungicide"},
+30: {"disease": "Tomato Late Blight", "pesticide": "Chlorothalonil"},
+32: {"disease": "Tomato Leaf Mold", "pesticide": "Copper Hyydroxide"},
+33: {"disease": "Tomato Septoria Leaf Spot", "pesticide": "Mancozeb"},
+34: {"disease": "Tomato Two Spotted spider mite", "pesticide": "Spinosad"},
+35: {"disease": "Tomato Target Spot", "pesticide": "Mancozeb"},
+36: {"disease": "Tomato Yellow Leaf Curl Virus", "pesticide": "Pymetrozin"},
+37: {"disease": "Tomato Mosaic Virus", "pesticide": "Remove and Destroy Infected plants"},
+38: {"disease": "Tomato Healthy", "pesticide": "Healthy Leaf,No need of any Pesticide"}
+}
+
+if file is not None:
+    img = load_img(file, target_size=(256, 256))
+    org = Image.open(file)
+    st.image(org, caption='Uploaded Image.', use_column_width=True)
+    img = img_to_array(img)
+    img = preprocess_input(img)
+    img = np.expand_dims(img, axis=0)
+    pred = np.argmax(model.predict(img))
+    
+    if pred in information:
+        result = information[pred]
+        st.title(f"Predicted Disease: {result['disease']}")
+        st.write(f"Recommended Pesticide: {result['pesticide']}")
+    else:
+        st.title("No Image Found")
